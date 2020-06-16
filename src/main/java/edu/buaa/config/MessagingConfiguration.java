@@ -3,6 +3,7 @@ package edu.buaa.config;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import edu.buaa.service.messaging.channel.ShareChannel;
 import edu.buaa.service.messaging.channel.UpdateTargetChannel;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Source;
@@ -21,7 +22,7 @@ import org.springframework.messaging.support.GenericMessage;
  * See http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/
  * for the official Spring Cloud Stream documentation.
  */
-@EnableBinding(value = { Source.class,UpdateTargetChannel.class})
+@EnableBinding(value = { Source.class,UpdateTargetChannel.class,ShareChannel.class})
 public class MessagingConfiguration {
 
     @Value("${spring.application.name:JhipsterService}")
