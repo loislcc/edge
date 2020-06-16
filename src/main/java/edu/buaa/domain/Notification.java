@@ -6,6 +6,27 @@ public class Notification {
     private String owner;
     private int[][] map;
     private String body;
+    private int ownerId;
+
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    private String type;
+
+
 
     public String getOwner() {
         return owner;
@@ -37,6 +58,8 @@ public class Notification {
             "owner='" + owner + '\'' +
             ", map=" + Arrays.toString(map) +
             ", body='" + body + '\'' +
+            ", ownerId=" + ownerId +
+            ", type='" + type + '\'' +
             '}';
     }
 }

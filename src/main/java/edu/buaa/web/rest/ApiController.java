@@ -1,32 +1,21 @@
 package edu.buaa.web.rest;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import edu.buaa.domain.Notification;
 import edu.buaa.domain.messaging.TargetNotification;
 import edu.buaa.service.Constant;
 import edu.buaa.service.messaging.ShareNotiProducer;
 import edu.buaa.service.messaging.UpdateTargetNotificationProducer;
-import edu.buaa.service.messaging.channel.UpdateTargetChannel;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.servlet.http.HttpServletResponse;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ForkJoinPool;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -36,6 +25,9 @@ public class ApiController {
     private UpdateTargetNotificationProducer updateTargetNotificationProducer;
     private ShareNotiProducer shareNotiProducer;
     private Constant constant;
+
+
+
 
     public ApiController(UpdateTargetNotificationProducer updateTargetNotificationProducer,ShareNotiProducer shareNotiProducer,
                          Constant constant) {
@@ -81,6 +73,8 @@ public class ApiController {
         shareNotiProducer.sendMsgToEdges(msg);
 
     }
+
+
 
 
 
