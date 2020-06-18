@@ -7,7 +7,7 @@ public class Notification {
     private int[][] map;
     private String body;
     private int ownerId;
-    private String targetId;
+    private int targetId;
     private String type;
 
     public int getOwnerId() {
@@ -26,11 +26,11 @@ public class Notification {
         this.type = type;
     }
 
-    public String getTargetId() {
+    public int getTargetId() {
         return targetId;
     }
 
-    public void setTargetId(String targetId) {
+    public void setTargetId(int targetId) {
         this.targetId = targetId;
     }
 

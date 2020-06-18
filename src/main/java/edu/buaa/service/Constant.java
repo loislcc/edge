@@ -14,8 +14,9 @@ import java.util.List;
 public class Constant {
     public String Edgename = "edge";
     public int term = 0;
-    public String leader = this.Edgename;
+    public String leader = "";
     public List<Integer> neigboursId = null;
     public List<String> neigboursName = null;
     public List<Device> neigbour = new ArrayList<>();
+    public int ticket = 1;
 }
