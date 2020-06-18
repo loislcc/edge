@@ -51,10 +51,12 @@ spring:
                     group: targetDetection
                 ShareInChannel:
                     destination: amongedge
-                    group: edges
+#                    group: edges    // 非持久队列
                 ShareOutChannel:
                     destination: amongedge
-                    group: edges
+#                    group: edges
+#            Durability:
+
 #                output:
 #                    destination: topic-jhipster
     datasource:
