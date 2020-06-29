@@ -23,7 +23,7 @@ public class RaftTask implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        //代码块
+        //代码块  项目启动后请求leader
         System.err.println("启动开始: " + LocalDateTime.now());
         if(constant.leader.equals("")){
             Notification msg = new Notification();

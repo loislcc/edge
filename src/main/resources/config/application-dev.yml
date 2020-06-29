@@ -55,6 +55,12 @@ spring:
                 ShareOutChannel:
                     destination: amongedge
 #                    group: edges
+                GameInChannel:
+                    destination: gamedge
+                    #                    group: edges    // 非持久队列
+                GameOutChannel:
+                    destination: gamedge
+                #                    group: edges
 #            Durability:
 
 #                output:

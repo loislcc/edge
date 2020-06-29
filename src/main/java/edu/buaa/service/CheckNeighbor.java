@@ -57,7 +57,7 @@ public class CheckNeighbor {
     }
 
     @Scheduled(cron = "0/7 * * * * ?")  //或直接指定时间间隔，例如：5秒//@Scheduled(fixedRate=5000)
-    private void checkterm() throws ParseException {    // 每隔5秒发送心跳信息
+    private void checkterm() throws ParseException {    // 每隔 检查leader状态
         System.err.println("设备邻居: " + constant.neigbour.toString());
         boolean flag = false;
         if(constant.leader.equals("")){

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -71,5 +72,11 @@ public class InfoService {
     public void delete(Long id) {
         log.debug("Request to delete Info : {}", id);
         infoRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Info> findAllInfo() {
+        log.debug("Request to get all Infos");
+        return infoRepository.findAll();
     }
 }
