@@ -97,11 +97,75 @@ public class ApiController {
 
     }
 
+    @GetMapping("/test")
+    public void test() {
+//        Info info = infoService.findbyname("file01");
+//        System.err.println("!!!!"+info.toString());
+
+        double alltuntu = 0;
+        int n = 3;// 设备数量
+        String[][] transmission = new String[n][];
+        int[][] grap = {{0,1,0},{0,0,0},{0,0,0}}; // 最终网络结构邻接矩阵
+        String[][] b= {{"file01","file02"},{"file02","file03"},{"file03"}};
+        String[] all = {"file01","file02","file03"};
+        String[] deviceName = {"edge","edge2","edge3"};
+        HashMap<String,Integer> sizeofms = new HashMap<>();
+        sizeofms.put("file01",12);
+        sizeofms.put("file02",12);
+        sizeofms.put("file03",12);
+        double certaintotal = 108;
+        double tuntu = 0;
+        for(int v=0;v<n;v++){
+            boolean flag = false;
+            for(int t=0;t<n;t++){
+                if(grap[t][v] == 1) {
+                    String[] vv = b[v];
+                    String[] tt = b[t] ;
+                    String[] transTtoV =  BJC.getJ(BJC.getC(all,vv),tt);     // 传输内容块
+                    // 传输
+                    infoService.translate(deviceName[t],deviceName[v],transTtoV);
+                    String[] newv = BJC.getB(transTtoV,vv);
+                    transmission[v] = newv;
+                    flag = true;
+                    for(String one: transTtoV){
+                        tuntu += sizeofms.get(one);
+                    }
+                    break;
+                }
+            }
+            if(!flag){
+                transmission[v] = b[v];
+            }
+        }
+        for(int g = 0;g < transmission.length;g++){   // 传输后的内容情况 作为下次迭代的输入
+            b[g] = transmission[g].clone();
+        }
+        System.out.println("-----------");
+        double total = 0;
+        for(int g = 0;g < b.length;g++){   // 传输后的内容情况 作为下次迭代的输入
+            for(int h=0;h<b[g].length;h++){
+                System.out.print(b[g][h]);
+                total+=sizeofms.get(b[g][h]);
+            }
+            System.out.println("");
+        }
+        System.out.println("吞吐量："+ tuntu);
+        alltuntu += tuntu;
+        double average = (double) total/ (certaintotal*n);
+        System.out.println("平均内容量："+ average);
+        System.out.println("-----------");
+
+    }
+
     @GetMapping("/game")
     public  void runGame() {
         List<Info> infos = infoService.findAllInfo();
         List<Info> infos2 = sendClient.get2Infos();
         List<Info> infos3 = sendClient3.get3Infos();
+        List<List<Info>> anyinfos = new ArrayList<>();
+        anyinfos.add(infos);
+        anyinfos.add(infos2);
+        anyinfos.add(infos3);
 //        if (infos2 != null) {
 //            for(Object info: infos2)
 //                System.err.println(info.toString());
@@ -113,27 +177,33 @@ public class ApiController {
 //        }
 
 //        int[][] bintial={{1,2},{2,3},{3}}; //各设备拥有的初始内容块
+        HashMap<Stragey,Integer> history = new HashMap<>();
+
+        String[] deviceName = {"edge","edge2","edge3"};
+
         String[][] bintial= new String[3][]; //各设备拥有的初始内容块
+
 
         bintial[0] = convert(infos);
         bintial[1] = convert(infos2);
-        bintial[2] = convert(infos3);
-        int[][] sizeofms = new int[3][];
-        sizeofms[0] = convertsize(infos);
-        sizeofms[1] = convertsize(infos2);
-        sizeofms[2] = convertsize(infos3);
-
+        bintial[2] = convert(infos3);   // 存放文件名filename 唯一
+//        int[][] sizeofms = new int[3][];
+//        sizeofms[0] = convertsize(infos);
+//        sizeofms[1] = convertsize(infos2);
+//        sizeofms[2] = convertsize(infos3);
+        HashMap<String,Integer> sizeofms = convertsize(anyinfos);
 
         double certaintotal = 0;
         double tst = 0;
+
         HashSet<String> hashSet = new HashSet<>();
         for(int i=0;i<bintial.length;i++){
             for(int j=0;j<bintial[i].length;j++){
                 if(!hashSet.contains(bintial[i][j])){
                     hashSet.add(bintial[i][j]);
-                    certaintotal += sizeofms[i][j];
+                    certaintotal += sizeofms.get(bintial[i][j]);
                 }
-                tst += sizeofms[i][j];
+                tst += sizeofms.get(bintial[i][j]);
             }
         }
         if(constant.leader.equals(constant.Edgename))
@@ -146,17 +216,108 @@ public class ApiController {
             msg.setOwnerId(1);
             gameNotiProducer.sendMsgToEdges(msg);
         }
+        String[] all = new String[hashSet.size()];
+        int index = 0;
+        for(String temp: hashSet)
+            all[index++] = temp;                           // 存放目前全局所有类型的内容块
+        String[][] b= new String[bintial.length][];
+        for(int g = 0;g < bintial.length;g++){
+            b[g] = bintial[g].clone();
+        }
+        int outinter = 0;
+        double alltuntu = 0;
+        int n = 3;// 设备数量
+         int[][] oldgrap = new int[n][n];
+         int[][] grap = new int[n][n]; // 最终网络结构邻接矩阵
+        while(true){
+//            iterations(b);
+            outinter++;
+            // 按结构传输
+            String[][] transmission = new String[n][];
+            double tuntu = 0;
+            for(int v=0;v<n;v++){
+                boolean flag = false;
+                for(int t=0;t<n;t++){
+                    if(grap[t][v] == 1) {
+                        String[] vv = b[v];
+                        String[] tt = b[t] ;
+                        String[] transTtoV =  BJC.getJ(BJC.getC(all,vv),tt);     // 传输内容块
+                        // 传输
+                        infoService.translate(deviceName[t],deviceName[v],transTtoV);
+                        String[] newv = BJC.getB(transTtoV,vv);
+                        transmission[v] = newv;
+                        flag = true;
+                        for(String one: transTtoV){
+                            tuntu += sizeofms.get(one);
+                        }
+                        break;
+                    }
+                }
+                if(!flag){
+                    transmission[v] = b[v];
+                }
+            }
+            for(int g = 0;g < transmission.length;g++){   // 传输后的内容情况 作为下次迭代的输入
+                b[g] = transmission[g].clone();
+            }
+            System.out.println("-----------");
+            double total = 0;
+            for(int g = 0;g < b.length;g++){   // 传输后的内容情况 作为下次迭代的输入
+                for(int h=0;h<b[g].length;h++){
+                    System.out.print(b[g][h]);
+                    total+=sizeofms.get(b[g][h]);
+                }
+                System.out.println("");
+            }
+            System.out.println("吞吐量："+ tuntu);
+            alltuntu += tuntu;
+            double average = (double) total/ (certaintotal*n);
+            System.out.println("平均内容量："+ average);
+            System.out.println("-----------");
+
+            boolean same = true;
+            for(int ch = 0; ch<n; ch++){
+                if(b[ch].length != hashSet.size()) {
+                    same = false;
+                    break;
+                }
+            }
+            if (same ) {
+                System.out.println("全局一致:" + outinter);
+                System.out.println("平均吞吐:" + (double)alltuntu/outinter);
+                break;
+            }
+            for(int j = 0;j<grap.length;j++) {
+                for(int k=0;k<grap[0].length;k++) grap[j][k] = 0;
+            }
+            for(int g = 0;g < grap.length;g++){
+                oldgrap[g] = grap[g].clone();
+            }
+            history.clear();
+        }
+
 
     }
 
-    private int[] convertsize(List<Info> infos) {
-        int size = infos.size();
-        int[] first = new int[size];
-        int j = 0;
-        for(Info info: infos) {
-            first[j++] = info.getFile_size().intValue();
+//    private int[] convertsize(List<Info> infos) {
+//        int size = infos.size();
+//        int[] first = new int[size];
+//        int j = 0;
+//        for(Info info: infos) {
+//            first[j++] = info.getFile_size().intValue();
+//        }
+//        return first;
+//    }
+    private HashMap<String,Integer> convertsize(List<List<Info>> anyinfos ) {
+        HashMap<String, Integer> map  = new HashMap<>();
+        for (List<Info> oneinfos : anyinfos) {
+            for (Info info : oneinfos) {
+                if (!map.containsKey(info.getFile_name())) {
+                    map.put(info.getFile_name(), info.getFile_size().intValue());
+                }
+            }
         }
-        return first;
+        return map;
     }
 
     private String[] convert(List<Info> infos) {

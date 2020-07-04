@@ -8,6 +8,7 @@ public class Notification {
     private String body;
     private int ownerId;
     private int targetId;
+    private String target;
     private String type;
 
     public int getOwnerId() {
@@ -34,6 +35,14 @@ public class Notification {
         this.targetId = targetId;
     }
 
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
     public String getOwner() {
         return owner;
     }
@@ -58,6 +67,7 @@ public class Notification {
         this.body = body;
     }
 
+
     @Override
     public String toString() {
         return "Notification{" +
@@ -65,7 +75,8 @@ public class Notification {
             ", map=" + Arrays.toString(map) +
             ", body='" + body + '\'' +
             ", ownerId=" + ownerId +
-            ", targetId='" + targetId + '\'' +
+            ", targetId=" + targetId +
+            ", target=" + target +
             ", type='" + type + '\'' +
             '}';
     }
