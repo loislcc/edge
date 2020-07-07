@@ -90,6 +90,11 @@ public class InfoService {
     }
 
     @Transactional(readOnly = true)
+    public boolean existsbyname(String name) {
+        return infoRepository.existsByfileName(name);
+    }
+
+    @Transactional(readOnly = true)
     public Info findbyname(String filename) {
         return infoRepository.findByfileName(filename).get();
     }
@@ -120,11 +125,16 @@ public class InfoService {
             notification.setBody(trans.toJSONString());
             gameNotiProducer.sendMsgToEdges(notification);
         } else {
-
             Notification notification = new Notification();
             notification.setType("translate");
-            notification.setTarget(Vnode);
-            notification.setOwner(Tnode);
+            notification.setOwner(constant.Edgename);    // 用于接收
+            notification.setTarget(Tnode);
+            JSONObject msg = new JSONObject();
+            msg.put("source",Tnode);
+            msg.put("target",Vnode);
+            msg.put("content", transTtoV);
+            notification.setBody(msg.toJSONString());
+            gameNotiProducer.sendMsgToEdges(notification);
         }
     }
 
