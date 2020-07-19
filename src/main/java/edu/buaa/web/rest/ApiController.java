@@ -44,6 +44,19 @@ public class ApiController {
     @Resource
     private SendClient3 sendClient3;
 
+    private HashMap<Stragey,Integer> history = new HashMap<>();
+    private int m = 0;
+    private double Msize = 0;
+    private int n = 3;// 设备数量
+    private int[][] oldgrap = new int[n][n];
+    private int[][] grap = new int[n][n]; // 最终网络结构邻接矩阵
+    private double wofout = 1;
+    private double wofin = 1;
+    private int bound = 200; // 策略选择上界
+    private String[] deviceName = {"edge","edge2","edge3"};
+    private String[][] bintial= new String[n][]; //各设备拥有的初始内容块
+    private HashMap<String,HashSet<String>> map=new HashMap<>();
+    private HashMap<String,Integer> sizeofms = new HashMap<>();
 
 
 
@@ -105,7 +118,7 @@ public class ApiController {
         double alltuntu = 0;
         int n = 3;// 设备数量
         String[][] transmission = new String[n][];
-        int[][] grap = {{0,1,0},{0,0,0},{0,0,0}}; // 最终网络结构邻接矩阵
+        int[][] grap = {{0,0,0},{1,0,0},{0,0,0}}; // 最终网络结构邻接矩阵
         String[][] b= {{"file01","file02"},{"file02","file03"},{"file03"}};
         String[] all = {"file01","file02","file03"};
         String[] deviceName = {"edge","edge2","edge3"};
@@ -166,22 +179,8 @@ public class ApiController {
         anyinfos.add(infos);
         anyinfos.add(infos2);
         anyinfos.add(infos3);
-//        if (infos2 != null) {
-//            for(Object info: infos2)
-//                System.err.println(info.toString());
-//        }
-//
-//        if (infos3 != null) {
-//            for(Info info: infos3)
-//                System.err.println(info.toString());
-//        }
 
-//        int[][] bintial={{1,2},{2,3},{3}}; //各设备拥有的初始内容块
-        HashMap<Stragey,Integer> history = new HashMap<>();
 
-        String[] deviceName = {"edge","edge2","edge3"};
-
-        String[][] bintial= new String[3][]; //各设备拥有的初始内容块
 
 
         bintial[0] = convert(infos);
@@ -191,10 +190,11 @@ public class ApiController {
 //        sizeofms[0] = convertsize(infos);
 //        sizeofms[1] = convertsize(infos2);
 //        sizeofms[2] = convertsize(infos3);
-        HashMap<String,Integer> sizeofms = convertsize(anyinfos);
+        sizeofms = convertsize(anyinfos);
 
         double certaintotal = 0;
         double tst = 0;
+
 
         HashSet<String> hashSet = new HashSet<>();
         for(int i=0;i<bintial.length;i++){
@@ -206,6 +206,8 @@ public class ApiController {
                 tst += sizeofms.get(bintial[i][j]);
             }
         }
+        m = hashSet.size();
+        Msize = certaintotal;
         if(constant.leader.equals(constant.Edgename))
             System.err.println("初始内容百分比:"+(tst/(certaintotal*3)));
         else {
@@ -226,11 +228,9 @@ public class ApiController {
         }
         int outinter = 0;
         double alltuntu = 0;
-        int n = 3;// 设备数量
-         int[][] oldgrap = new int[n][n];
-         int[][] grap = new int[n][n]; // 最终网络结构邻接矩阵
+
         while(true){
-//            iterations(b);
+            iterations(b);
             outinter++;
             // 按结构传输
             String[][] transmission = new String[n][];
@@ -297,6 +297,306 @@ public class ApiController {
         }
 
 
+    }
+
+    private  void iterations(String[][] b){  // a:deviceName
+        for(int i=0;i<n;i++){
+            HashSet<String> set = new HashSet<>();
+            Collections.addAll(set, b[i]);
+            map.put(deviceName[i],set);   //保存每个设备的内容块，其中内容块唯一
+        }
+        boolean outflag = true;
+        int iter = 0;
+
+        for(int i=0;i<n;i++){
+            System.out.println("process："+i);
+            process(i,b);
+
+            for(int y=0; y<n; y++){
+                for(int x=0; x<n; x++){
+                    if(grap[y][x] == 1){
+                        System.out.println("ins:"+ (y+1) +"->" + (x+1));
+                    }
+                }
+            }
+
+            if(!tool.deepEquals(oldgrap,grap)){
+                for(int g = 0;g < grap.length;g++){
+                    oldgrap[g] = grap[g].clone();
+                }
+                iter++;
+            } else {
+                break;
+            }
+        }
+        int converge = 0;
+        while (true){
+            Random rand = new Random();
+            int any = rand.nextInt(n);
+            System.out.println("process："+any);
+
+            for(int y=0; y<n; y++){
+                for(int x=0; x<n; x++){
+                    if(grap[y][x] == 1){
+                        System.out.println("ins:"+ (y+1) +"->" + (x+1));
+                    }
+                }
+            }
+
+            process(any,b);
+            if(!tool.deepEquals(oldgrap,grap)){
+                for(int g = 0;g < grap.length;g++){
+                    oldgrap[g] = grap[g].clone();
+                }
+                iter++;
+            } else {
+                converge++;
+            }
+            if(converge>10) break;
+        }
+
+//        for(int i=0;i<n;i++){   // 遍历ED;
+//            process(i);
+//        }
+        for(int y=0; y<n; y++){
+            for(int x=0; x<n; x++){
+                if(grap[y][x] == 1){
+                    System.out.println("s:"+ (y+1) +"->" + (x+1));
+                }
+            }
+        }
+        System.out.println("内层迭代："+iter);
+
+    }
+
+    private  void process(int i,String[][] b){ // a:deviceName
+//        double ut = utility[i];   // 当前有向图所有的效用
+
+        double oldvalue = calcu(grap,i,b);
+        List<Integer> listofout = new ArrayList<>();
+        List<Integer> listofin = new ArrayList<>();
+        List<Double> valueofout = new ArrayList<>();
+        List<Double> valueofin = new ArrayList<>();
+        for(int j=0; j<n; j++){    // 遍历所有邻居
+            if(j==i) continue;
+            boolean contiout = false,contiin = false;
+            int blocktemp=0,blockin = 0;
+            double blocksizetemp=0,blocksizein = 0;
+
+            // 如果当前邻居的入度为1时则不能再进行连接
+            for(int nn=0;nn<n;nn++){
+                if(grap[nn][j]==1) {
+                    contiout = true;
+                    break;
+                }
+            }
+            if(!contiout) {
+                for(int k=0;k<b[i].length;k++){   //遍历当前玩家i的所有内容块 记录valueofout
+                    HashSet temp = map.get(deviceName[j]);
+                    if(!temp.contains(b[i][k])){
+                        blocktemp += 1;
+                        blocksizetemp += sizeofms.get(b[i][k]);
+                    }
+                }
+                // 记录当前玩家j的 i->j out value
+                if(blocktemp>0){   // 当有所贡献时进行记录
+                    Stragey exit = new Stragey(i,j);   // 0开始计数
+                    if(!history.containsKey(exit) || history.get(exit) != -1){
+                        listofout.add(j);
+                        valueofout.add(wofout*((double) blocktemp/(m-b[j].length))*blocksizetemp/Msize) ;
+//                    valueofout.add(wofout*(double) blocktemp) ;
+                    }
+                }
+            }
+
+            // 如果当前邻居的出度为1时则不能再进行连接
+            for(int nn=0;nn<n;nn++){
+                if(grap[j][nn]==1) {
+                    contiin = true;
+                    break;
+                }
+            }
+            if(!contiin) {
+                for(int k=0;k<b[j].length;k++){ //遍历当前玩家j的所有内容块 记录valueofin
+                    HashSet tempin = map.get(deviceName[i]);
+                    if(!tempin.contains(b[j][k])){
+                        blockin += 1;
+                        blocksizein += sizeofms.get(b[j][k]);
+                    }
+                }
+                if(blockin >0){  // 当有所贡献时进行记录
+                    // 记录当前玩家j的 j->i in value
+                    Stragey exit2 = new Stragey(j,i);   // 0开始计数
+                    if(!history.containsKey(exit2) || history.get(exit2) != -1){
+                        listofin.add(j);
+                        valueofin.add(wofin*((double)blockin/(m-b[i].length))*blocksizein/Msize);
+//                    valueofin.add(wofin*(double)blockin);
+                    }
+                }
+
+            }
+        }
+
+        // 对valueofin valueofout index和value都进行排序
+        int lengthin = listofin.size();
+        int lengthout = listofout.size();
+        pair[] sortin = new pair[lengthin];
+        for(int q=0;q<lengthin;q++){
+            sortin[q] = new pair(listofin.get(q),valueofin.get(q));
+        }
+        Arrays.sort(sortin);
+        int[] indexsin = new int[lengthin];
+        double[] valuesin = new double[lengthin];
+        int ih = 0;
+        for(pair element : sortin){
+            indexsin[ih] = element.index;
+            valuesin[ih] = element.value;
+            ih++;
+        }
+
+        pair[] sortout = new pair[lengthout];
+        for(int q=0;q<lengthout;q++){
+            sortout[q] = new pair(listofout.get(q),valueofout.get(q));
+        }
+        Arrays.sort(sortout);
+        int[] indexsout = new int[lengthout];
+        double[] valuesout = new double[lengthout];
+        ih = 0;
+        for(pair element : sortout){
+            indexsout[ih] = element.index;
+            valuesout[ih] = element.value;
+            ih++;
+        }
+
+
+        if(valuesin.length !=0 && valuesout.length!=0){
+            double nowvlaue = valuesin[0] + valuesout[0] ;
+//            double nowvlaue = valuesin[0] + valuesout[0] - dist[i][indexsin[0]]*dist[i][indexsout[0]]*0.001;
+
+            if(nowvlaue >= oldvalue){
+                Stragey best  = new Stragey(indexsin[0],i);
+                if(history.containsKey(best)){
+                    int old = history.get(best);
+                    if(old+1>bound){
+                        history.put(best,-1);   // 达到上界，即将舍弃该策略
+                    }else {
+                        history.put(best,old+1);  // 策略值加一
+                    }
+                } else {
+                    history.put(best,1);
+                }
+
+                Stragey best2  = new Stragey(i,indexsout[0]);
+                if(history.containsKey(best2)){
+                    int old = history.get(best2);
+                    if(old+1>bound){
+                        history.put(best2,-1);   // 达到上界，舍弃该策略
+                    }else {
+                        history.put(best2,old+1);  // 策略值加一
+                    }
+
+                }else {
+                    history.put(best2,1);
+                }
+                for(int pp=0; pp<n; pp++){
+                    grap[pp][i] = 0;
+                    grap[i][pp] = 0;
+                }
+                grap[indexsin[0]][i] = 1;
+                grap[i][indexsout[0]] = 1;
+            }
+        }
+        if(valuesin.length ==0 && valuesout.length!=0){
+            double nowvalue = valuesout[0] ;
+//            double nowvalue = valuesout[0] - dist[i][indexsout[0]]*0.001;
+
+            if(nowvalue >= oldvalue){
+                Stragey best  = new Stragey(i,indexsout[0]);
+                if(history.containsKey(best)){
+                    int old = history.get(best);
+                    if(old+1>bound){
+                        history.put(best,-1);   // 达到上界，舍弃该策略
+                    }else {
+                        history.put(best,old+1);  // 策略值加一
+                    }
+                } else {
+                    history.put(best,1);
+                }
+                for(int pp=0; pp<n; pp++){
+                    grap[pp][i] = 0;
+                    grap[i][pp] = 0;
+                }
+                grap[i][indexsout[0]] = 1;
+
+            }
+        }
+        if(valuesout.length ==0 && valuesin.length !=0){
+            double nowvalue = valuesin[0] ;
+//            double nowvalue = valuesin[0] - dist[i][indexsin[0]]*0.001;
+
+            if( nowvalue >= oldvalue){
+                Stragey best  = new Stragey(indexsin[0],i);
+                if(history.containsKey(best)){
+                    int old = history.get(best);
+                    if(old+1>bound){
+                        history.put(best,-1);   // 达到上界，舍弃该策略
+                    }else {
+                        history.put(best,old+1);  // 策略值加一
+                    }
+                } else {
+                    history.put(best,1);
+                }
+                for(int pp=0; pp<n; pp++){
+                    grap[pp][i] = 0;
+                    grap[i][pp] = 0;
+                }
+                grap[indexsin[0]][i] = 1;
+            }
+        }
+    }
+
+    private  double calcu(int[][] network,int t ,String[][] b){
+        double valueoft = 0;
+        int blockin=0,blocktemp=0;
+        double blocksizein = 0,blocksizetemp=0;
+        int in = -1;
+        for(int i=0; i<network.length; i++){
+            if(network[i][t] == 1){
+                in = i;
+//                System.out.println("找到"+i+"->"+t);
+                for(int p=0;p<b[i].length;p++){
+                    HashSet temp = map.get(deviceName[t]);
+                    if(!(temp.contains(b[i][p]))){
+                        blockin += 1;
+                        blocksizein += sizeofms.get(b[i][p]);
+                    }
+                }
+            }
+        }
+        if(in!=-1)
+//        valueoft += wofin*(double)blockin;
+            valueoft += wofin*((double)blockin/(m-b[t].length))*blocksizein/Msize;
+        int out = -1;
+        for(int i=0;i<network[0].length;i++){
+            if(network[t][i] == 1){
+                out = i;
+//                System.out.println("找到"+t+"->"+i);
+                for(int p=0; p<b[t].length;p++){
+                    HashSet temp = map.get(deviceName[i]);
+                    if(!(temp.contains(b[t][p]))){
+                        blocktemp +=1;
+                        blocksizetemp += sizeofms.get(b[t][p]);
+                    }
+                }
+
+            }
+        }
+//        valueoft += wofout*(double)blocktemp;
+        if(out!=-1){
+            valueoft += wofout*((double) blocktemp/(m-b[out].length))*blocksizetemp/Msize;
+        }
+//        System.out.println("over");
+        return valueoft;
     }
 
 //    private int[] convertsize(List<Info> infos) {

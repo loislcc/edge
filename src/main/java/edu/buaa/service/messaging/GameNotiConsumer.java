@@ -64,7 +64,12 @@ public class GameNotiConsumer {
                 JSONObject object = JSONObject.parseObject(msg.getBody());
                 String Tnode = object.getString("source");
                 String Vnode = object.getString("target");
-                String[] transTtoV = (String[]) object.get("content");
+                JSONArray tmp =  object.getJSONArray("content");
+                String[] transTtoV = new String[tmp.size()];
+                int j=0;
+                for(Object s: tmp){
+                    transTtoV[j++] = s.toString();
+                }
                 log.debug("translate from : {} to : {}, *{}*,",Tnode,Vnode,fomat(transTtoV));
                 JSONArray trans = new JSONArray();
                 for(String filename: transTtoV){
