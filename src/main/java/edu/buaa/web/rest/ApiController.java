@@ -11,12 +11,15 @@ import edu.buaa.service.Constant;
 import edu.buaa.service.InfoService;
 import edu.buaa.service.SendClient;
 import edu.buaa.service.SendClient3;
+import edu.buaa.service.messaging.GameNotiConsumer;
 import edu.buaa.service.messaging.GameNotiProducer;
 import edu.buaa.service.messaging.ShareNotiProducer;
 import edu.buaa.service.messaging.UpdateTargetNotificationProducer;
 
 import io.swagger.models.auth.In;
 import org.apache.kafka.common.network.Send;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +42,8 @@ public class ApiController {
     private GameNotiProducer gameNotiProducer;
     private Constant constant;
     private InfoService infoService;
+    private final Logger log = LoggerFactory.getLogger(GameNotiConsumer.class);
+
     @Resource
     private SendClient sendClient;
     @Resource
@@ -92,12 +97,16 @@ public class ApiController {
         targetNotification.setIp(localip);
         targetNotification.setCurrentTime(sdf.format(new Date()));
         targetNotification.setCategory("Car");
+        targetNotification.setName("20200904");
         targetNotification.setLongitude(120.191157);
         targetNotification.setLatitude(30.274664);
 //        targetNotification.setSelfLongitude(116.434924);
 //        targetNotification.setSelfLatitude(39.915671);116.433547
         targetNotification.setSelfLongitude(120.188426);
         targetNotification.setSelfLatitude(30.273884);
+        targetNotification.setOwner(constant.Edgename);
+        targetNotification.setLevel("top");
+        log.debug("*******,{}",targetNotification.toString());
         updateTargetNotificationProducer.sendMsgToGateway(targetNotification);
     }
 
