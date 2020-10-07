@@ -60,6 +60,9 @@ spring:
                     #                    group: edges    // 非持久队列
                 GameOutChannel:
                     destination: gamedge
+                ToConsoleChannel:
+                    destination: console
+                    group: consoleDetection
                 #                    group: edges
 #            Durability:
 

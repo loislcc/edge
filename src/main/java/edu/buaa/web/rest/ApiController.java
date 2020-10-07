@@ -11,16 +11,15 @@ import edu.buaa.service.Constant;
 import edu.buaa.service.InfoService;
 import edu.buaa.service.SendClient;
 import edu.buaa.service.SendClient3;
-import edu.buaa.service.messaging.GameNotiConsumer;
-import edu.buaa.service.messaging.GameNotiProducer;
-import edu.buaa.service.messaging.ShareNotiProducer;
-import edu.buaa.service.messaging.UpdateTargetNotificationProducer;
+import edu.buaa.service.messaging.*;
 
 import io.swagger.models.auth.In;
 import org.apache.kafka.common.network.Send;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -40,6 +39,7 @@ public class ApiController {
     private UpdateTargetNotificationProducer updateTargetNotificationProducer;
     private ShareNotiProducer shareNotiProducer;
     private GameNotiProducer gameNotiProducer;
+    private ToConsoleProducer toConsoleProducer;
     private Constant constant;
     private InfoService infoService;
     private final Logger log = LoggerFactory.getLogger(GameNotiConsumer.class);
@@ -67,7 +67,7 @@ public class ApiController {
 
     public ApiController(UpdateTargetNotificationProducer updateTargetNotificationProducer, ShareNotiProducer shareNotiProducer,
                          Constant constant, InfoService infoService, SendClient sendClient, SendClient3 sendClient3,
-                         GameNotiProducer gameNotiProducer) {
+                         GameNotiProducer gameNotiProducer, ToConsoleProducer toConsoleProducer) {
         this.updateTargetNotificationProducer = updateTargetNotificationProducer;
         this.shareNotiProducer = shareNotiProducer;
         this.constant  = constant;
@@ -75,6 +75,7 @@ public class ApiController {
         this.sendClient = sendClient;
         this.sendClient3 = sendClient3;
         this.gameNotiProducer = gameNotiProducer;
+        this.toConsoleProducer = toConsoleProducer;
     }
     @RequestMapping(value = "/map", method = RequestMethod.GET)
     public
@@ -90,7 +91,7 @@ public class ApiController {
     }
 
     @GetMapping("/detectTarget")
-    public void detectTarget() {
+    public ResponseEntity<JSONObject> detectTarget() {
         TargetNotification targetNotification = new TargetNotification();
         SimpleDateFormat sdf = new SimpleDateFormat();
         String localip = getLocalIpAddr();
@@ -108,6 +109,8 @@ public class ApiController {
         targetNotification.setLevel("top");
         log.debug("*******,{}",targetNotification.toString());
         updateTargetNotificationProducer.sendMsgToGateway(targetNotification);
+        toConsoleProducer.sendMsgToGatewayConsole(targetNotification);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/sendfromEdge")
