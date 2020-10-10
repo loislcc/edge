@@ -107,6 +107,7 @@ public class ApiController {
         targetNotification.setSelfLatitude(30.273884);
         targetNotification.setOwner(constant.Edgename);
         targetNotification.setLevel("top");
+        targetNotification.setBrief(localip+" ---> "+targetNotification.getCategory()+" in ("+targetNotification.getLongitude()+"，"+targetNotification.getLatitude()+");");
         log.debug("*******,{}",targetNotification.toString());
         updateTargetNotificationProducer.sendMsgToGateway(targetNotification);
         toConsoleProducer.sendMsgToGatewayConsole(targetNotification);
