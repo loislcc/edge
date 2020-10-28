@@ -4,6 +4,7 @@ package edu.buaa.service;
 import edu.buaa.domain.Device;
 import edu.buaa.domain.Notification;
 import edu.buaa.service.messaging.ShareNotiProducer;
+import edu.buaa.web.rest.util.IPUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -52,7 +53,8 @@ public class CheckNeighbor {
         msg.setOwner(constant.Edgename);
         msg.setType("heart");
         msg.setOwnerId(1);
-        msg.setBody("hello!");
+        msg.setBody("hello!"+IPUtils.getLocalIpAddr());
+
         shareNotiProducer.sendMsgToEdges(msg);
     }
 
