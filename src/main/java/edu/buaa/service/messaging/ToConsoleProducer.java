@@ -17,7 +17,7 @@ public class ToConsoleProducer {
     @Autowired
     private ToConsoleChannel toConsoleChannel;
 
-    public void sendMsgToGatewayConsole(TargetNotification targetNotification){
+    public void sendMsgToGatewayConsole(String targetNotification){
         log.debug("send msg to gateway console ");
         try {
             log.debug("send result: {}",

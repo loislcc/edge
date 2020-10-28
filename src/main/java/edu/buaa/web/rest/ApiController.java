@@ -110,7 +110,7 @@ public class ApiController {
         targetNotification.setBrief(localip+" ---> "+targetNotification.getCategory()+" in ("+targetNotification.getLongitude()+"，"+targetNotification.getLatitude()+");");
         log.debug("*******,{}",targetNotification.toString());
         updateTargetNotificationProducer.sendMsgToGateway(targetNotification);
-        toConsoleProducer.sendMsgToGatewayConsole(targetNotification);
+        toConsoleProducer.sendMsgToGatewayConsole(targetNotification.getBrief());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
