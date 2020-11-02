@@ -94,7 +94,7 @@ public class ApiController {
     @GetMapping("/detectTarget")
     public ResponseEntity<JSONObject> detectTarget() {
         TargetNotification targetNotification = new TargetNotification();
-        SimpleDateFormat sdf = new SimpleDateFormat();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String localip = IPUtils.getLocalIpAddr();
         targetNotification.setIp(localip);
         targetNotification.setCurrentTime(sdf.format(new Date()));
