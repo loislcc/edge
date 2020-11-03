@@ -3,8 +3,10 @@ package edu.buaa.web.rest;
 
 import com.alibaba.fastjson.JSONObject;
 import edu.buaa.domain.Constants;
+import edu.buaa.service.GatewayClient;
 import edu.buaa.service.messaging.GameNotiConsumer;
 import edu.buaa.web.rest.util.FileUtils;
+import edu.buaa.web.rest.util.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,10 @@ import java.io.IOException;
 @RequestMapping("/api")
 public class EsFileResource {
     private final Logger log = LoggerFactory.getLogger(GameNotiConsumer.class);
+    private GatewayClient gatewayClient;
+    public EsFileResource(GatewayClient gatewayClient) {
+        this.gatewayClient = gatewayClient;
+    }
 
     @PostMapping(value = "/PostFile")
     public ResponseEntity<JSONObject> postFile(@RequestParam("file") MultipartFile files) throws Exception {
@@ -42,6 +48,15 @@ public class EsFileResource {
         }catch(IOException e){
             e.printStackTrace();
         }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/getFile")
+    public ResponseEntity<JSONObject> getFile(@RequestParam("name") String name) {
+        String path = Constants.filepathtosave+File.separator+name+".txt";
+        File f = new File(path);
+        MultipartFile mf = utils.getMulFile(f);
+        gatewayClient.PostFile(mf);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
