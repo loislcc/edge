@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import edu.buaa.domain.Constants;
 import edu.buaa.service.GatewayClient;
 import edu.buaa.service.messaging.GameNotiConsumer;
-import edu.buaa.web.rest.util.FileUtils;
 import edu.buaa.web.rest.util.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

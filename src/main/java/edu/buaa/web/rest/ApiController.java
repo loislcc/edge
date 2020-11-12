@@ -150,7 +150,7 @@ public class ApiController {
                     String[] tt = b[t] ;
                     String[] transTtoV =  BJC.getJ(BJC.getC(all,vv),tt);     // 传输内容块
                     // 传输
-                    infoService.translate(deviceName[t],deviceName[v],transTtoV);
+                    infoService.translate(deviceName[t],deviceName[v],transTtoV);    // 传输
                     String[] newv = BJC.getB(transTtoV,vv);
                     transmission[v] = newv;
                     flag = true;
@@ -222,8 +222,11 @@ public class ApiController {
         }
         m = hashSet.size();
         Msize = certaintotal;
-        if(constant.leader.equals(constant.Edgename))
+        if(constant.leader.equals(constant.Edgename)){
             System.err.println("初始内容百分比:"+(tst/(certaintotal*3)));
+            String str = "["+ constant.Edgename + "] 启动博弈，初始内容百分比 : " +(tst/(certaintotal*3));
+            toConsoleProducer.sendMsgToGatewayConsole(str);
+        }
         else {
             Notification msg = new Notification();
             msg.setBody("初始内容百分比:"+(tst/(certaintotal*3)));
@@ -244,9 +247,16 @@ public class ApiController {
         double alltuntu = 0;
 
         while(true){
+            try {
+                Thread.sleep(1500);   // 休眠秒
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             iterations(b);
             outinter++;
             // 按结构传输
+            String str = "-------- 第" + outinter + "次外层迭代 --------";
+            toConsoleProducer.sendMsgToGatewayConsole(str);
             String[][] transmission = new String[n][];
             double tuntu = 0;
             for(int v=0;v<n;v++){
@@ -274,20 +284,24 @@ public class ApiController {
             for(int g = 0;g < transmission.length;g++){   // 传输后的内容情况 作为下次迭代的输入
                 b[g] = transmission[g].clone();
             }
-            System.out.println("-----------");
+//            System.out.println("-----------");
             double total = 0;
             for(int g = 0;g < b.length;g++){   // 传输后的内容情况 作为下次迭代的输入
                 for(int h=0;h<b[g].length;h++){
-                    System.out.print(b[g][h]);
+//                    System.out.print(b[g][h]);
                     total+=sizeofms.get(b[g][h]);
                 }
-                System.out.println("");
+//                System.out.println("");
             }
-            System.out.println("吞吐量："+ tuntu);
+//            System.out.println("吞吐量："+ tuntu);
+            String str1 = "-------- 第" + outinter + "次 吞吐量： "+ tuntu +" --------";
+            toConsoleProducer.sendMsgToGatewayConsole(str1);
             alltuntu += tuntu;
             double average = (double) total/ (certaintotal*n);
-            System.out.println("平均内容量："+ average);
-            System.out.println("-----------");
+//            System.out.println("平均内容量："+ average);
+            String str2 = "-------- 第" + outinter + "次 平均内容量： "+ average +" --------";
+            toConsoleProducer.sendMsgToGatewayConsole(str2);
+//            System.out.println("-----------");
 
             boolean same = true;
             for(int ch = 0; ch<n; ch++){
@@ -297,8 +311,12 @@ public class ApiController {
                 }
             }
             if (same ) {
-                System.out.println("全局一致:" + outinter);
-                System.out.println("平均吞吐:" + (double)alltuntu/outinter);
+//                System.out.println("全局一致:" + outinter);
+                String str3 = "-------- 全局一致 次数： "+ outinter +" --------";
+                toConsoleProducer.sendMsgToGatewayConsole(str3);
+//                System.out.println("平均吞吐:" + (double)alltuntu/outinter);
+                String str4= "-------- 全局一致 平均吞吐： "+ (double)alltuntu/outinter +" --------";
+                toConsoleProducer.sendMsgToGatewayConsole(str4);
                 break;
             }
             for(int j = 0;j<grap.length;j++) {

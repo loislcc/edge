@@ -2,10 +2,12 @@ package edu.buaa.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.javafx.image.impl.ByteIndexed;
 import edu.buaa.domain.Info;
 import edu.buaa.domain.Notification;
 import edu.buaa.repository.InfoRepository;
 import edu.buaa.service.messaging.GameNotiProducer;
+import edu.buaa.service.messaging.ToConsoleProducer;
 import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +32,13 @@ public class InfoService {
     private final InfoRepository infoRepository;
     private final Constant constant;
     private final GameNotiProducer gameNotiProducer;
+    private final ToConsoleProducer toConsoleProducer;
 
-    public InfoService(InfoRepository infoRepository,Constant constant,GameNotiProducer gameNotiProducer) {
+    public InfoService(InfoRepository infoRepository,Constant constant,GameNotiProducer gameNotiProducer,ToConsoleProducer toConsoleProducer) {
         this.infoRepository = infoRepository;
         this.constant  = constant;
         this.gameNotiProducer = gameNotiProducer;
+        this.toConsoleProducer = toConsoleProducer;
     }
 
     /**
@@ -102,6 +106,8 @@ public class InfoService {
     public void translate(String Tnode, String Vnode, String[] transTtoV) {
         if(Tnode.equals(constant.Edgename)){
             log.debug("translate from : {} to : {}, *{}*,",Tnode,Vnode,fomat(transTtoV));
+            String str = "["+ constant.Edgename + "] translate from : " + Tnode+" to : " + Vnode +", * " + fomat(transTtoV) +" *";
+            toConsoleProducer.sendMsgToGatewayConsole(str);
             JSONArray trans = new JSONArray();
             for(String filename: transTtoV){
                 Optional<Info> infoOptional =  infoRepository.findByfileName(filename);
@@ -134,6 +140,8 @@ public class InfoService {
             msg.put("target",Vnode);
             msg.put("content", transTtoV);
             notification.setBody(msg.toJSONString());
+            String str = "["+ Tnode + "] translate from : " + Tnode+" to : " + Vnode +", * " + fomat(transTtoV) +" *";
+            toConsoleProducer.sendMsgToGatewayConsole(str);
             gameNotiProducer.sendMsgToEdges(notification);
         }
     }

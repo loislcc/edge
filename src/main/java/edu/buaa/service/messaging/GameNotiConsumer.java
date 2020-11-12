@@ -25,14 +25,17 @@ public class GameNotiConsumer {
     private InfoService infoService;
     private final InfoRepository infoRepository;
     private final GameNotiProducer gameNotiProducer;
+    private final ToConsoleProducer toConsoleProducer;
 
 
     public GameNotiConsumer(Constant constant,InfoService infoService,
-                            InfoRepository infoRepository,GameNotiProducer gameNotiProducer) {
+                            InfoRepository infoRepository,GameNotiProducer gameNotiProducer,ToConsoleProducer toConsoleProducer) {
         this.constant = constant;
         this.infoService  = infoService;
         this.infoRepository = infoRepository;
         this.gameNotiProducer = gameNotiProducer;
+        this.toConsoleProducer = toConsoleProducer;
+
     }
 
     @StreamListener(GameChannel.CHANNELIN)
@@ -40,6 +43,8 @@ public class GameNotiConsumer {
         if(!msg.getOwner().equals("edge")) {   // 来自其余边缘节点的消息
             if(msg.getType().equals("gameintial") && constant.leader.equals(constant.Edgename)){
                 System.err.println(msg.getBody());
+                String str = "["+ constant.Edgename + "] 启动博弈，" +msg.getBody();
+                toConsoleProducer.sendMsgToGatewayConsole(str);
             }
             if(msg.getType().equals("translateFile") && msg.getTarget().equals(constant.Edgename)){
                 System.err.println("Get File from " + msg.getOwner() );
@@ -56,6 +61,7 @@ public class GameNotiConsumer {
                     info.setFile_body(one.getBytes("filebody"));
                     info.setFile_bodyContentType(one.getString("filebodyContentType"));
                     if(!infoService.existsbyname(info.getFile_name())){   // 不存在重复的name 就存储
+                        log.debug("!!!!!!!!!!!!!1,{}",info.toString());
                         infoService.save(info);
                     }
                 }
@@ -70,7 +76,7 @@ public class GameNotiConsumer {
                 for(Object s: tmp){
                     transTtoV[j++] = s.toString();
                 }
-                log.debug("translate from : {} to : {}, *{}*,",Tnode,Vnode,fomat(transTtoV));
+                log.debug("translate from : {} to : {}, *{}*",Tnode,Vnode,fomat(transTtoV));
                 JSONArray trans = new JSONArray();
                 for(String filename: transTtoV){
                     Optional<Info> infoOptional =  infoRepository.findByfileName(filename);
