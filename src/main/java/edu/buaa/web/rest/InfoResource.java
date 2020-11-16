@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.validation.Valid;
 import java.io.File;
@@ -144,11 +145,28 @@ public class InfoResource {
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
 
-    @PostMapping(value = "/PostFileforimg")
-    public ResponseEntity<JSONObject> postFileforimg(@RequestParam("uploadfile") MultipartFile files) throws Exception {
+    @PostMapping(value = "/importimage", consumes = "multipart/form-data")
+    public ResponseEntity<String> importTopology (MultipartHttpServletRequest request){
+        log.debug("REST request to upload files");
+
+        MultipartFile multipartFile = request.getFile("uploadfile");
+        //判断文件是否为空
+        if (multipartFile == null) {
+            log.error("null multipart");
+            return new ResponseEntity<String>("", HttpStatus.BAD_REQUEST);
+        }
+        //获取文件名
+        String name = multipartFile.getOriginalFilename();
+        //进一步判断文件是否为空（即判断其大小是否为0或其名称是否为null）
+        long size = multipartFile.getSize();
+        if (name == null || ("").equals(name) || size == 0) {
+            log.error("name error multipart");
+            return new ResponseEntity<>("", HttpStatus.BAD_REQUEST);
+        }
+
         String path = Constants.filepathtosaveimg;
         File file = new  File ( path );
-        String filename = files.getOriginalFilename();
+        String filename = multipartFile.getOriginalFilename();
         String  pathFile = path + File.separator + filename;
         File  newFile = new  File(pathFile);
         //判断文件夹是否存在，不存在则创建
@@ -158,7 +176,7 @@ public class InfoResource {
         }
         try{
             //文件传输到本地
-            files.transferTo(newFile);
+            multipartFile.transferTo(newFile);
 
         }catch(IOException e){
             e.printStackTrace();
@@ -172,7 +190,7 @@ public class InfoResource {
             byte[] bytes = new byte[in.available()];
             in.read(bytes);
             Info info = new Info();
-            info.setFile_name(filename);
+            info.setFile_name(filename.split("\\.")[0]);
             info.setFile_type("png");
             info.setFile_size(newFile.length());
             info.setFile_body(bytes);
@@ -181,6 +199,13 @@ public class InfoResource {
             log.debug("error write into mysql");
         }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("", HttpStatus.OK);
     }
+
+//    @PostMapping(value = "/PostFileforimg")
+//    public ResponseEntity<JSONObject> postFileforimg(@RequestParam("uploadfile") MultipartFile files) throws Exception {
+//
+//
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
 }
