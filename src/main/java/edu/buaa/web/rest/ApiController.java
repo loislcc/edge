@@ -185,7 +185,8 @@ public class ApiController {
     }
 
     @GetMapping("/game")
-    public  void runGame() {
+    public  ResponseEntity<JSONArray> runGame() {
+        JSONArray links = new JSONArray();
         List<Info> infos = infoService.findAllInfo();
         List<Info> infos2 = sendClient.get2Infos();
         List<Info> infos3 = sendClient3.get3Infos();
@@ -235,6 +236,9 @@ public class ApiController {
             msg.setOwnerId(1);
             gameNotiProducer.sendMsgToEdges(msg);
         }
+        if(tst/(certaintotal*3) == 1.0) {
+            return ResponseEntity.ok().body(links);
+        }
         String[] all = new String[hashSet.size()];
         int index = 0;
         for(String temp: hashSet)
@@ -256,6 +260,7 @@ public class ApiController {
             outinter++;
             // 按结构传输
             String str = "-------- 第" + outinter + "次外层迭代 --------";
+            JSONArray onesteplinks = new JSONArray();
             toConsoleProducer.sendMsgToGatewayConsole(str);
             String[][] transmission = new String[n][];
             double tuntu = 0;
@@ -266,6 +271,11 @@ public class ApiController {
                         String[] vv = b[v];
                         String[] tt = b[t] ;
                         String[] transTtoV =  BJC.getJ(BJC.getC(all,vv),tt);     // 传输内容块
+                        JSONObject jsonObject = new JSONObject();      // 记录links
+                        jsonObject.put("source",deviceName[t]);
+                        jsonObject.put("target",deviceName[v]);
+                        jsonObject.put("content",transTtoV);
+                        onesteplinks.add(jsonObject);
                         // 传输
                         infoService.translate(deviceName[t],deviceName[v],transTtoV);
                         String[] newv = BJC.getB(transTtoV,vv);
@@ -281,6 +291,7 @@ public class ApiController {
                     transmission[v] = b[v];
                 }
             }
+            links.add(onesteplinks);  // 添加一次外次迭代的Links
             for(int g = 0;g < transmission.length;g++){   // 传输后的内容情况 作为下次迭代的输入
                 b[g] = transmission[g].clone();
             }
@@ -328,6 +339,7 @@ public class ApiController {
             history.clear();
         }
 
+        return  ResponseEntity.ok().body(links);
 
     }
 
@@ -661,7 +673,6 @@ public class ApiController {
         }
         return first;
     }
-
 
 }
 

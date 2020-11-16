@@ -24,6 +24,7 @@ import java.io.IOException;
 public class EsFileResource {
     private final Logger log = LoggerFactory.getLogger(GameNotiConsumer.class);
     private GatewayClient gatewayClient;
+
     public EsFileResource(GatewayClient gatewayClient) {
         this.gatewayClient = gatewayClient;
     }
@@ -58,4 +59,6 @@ public class EsFileResource {
         gatewayClient.PostFile(mf);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
 }

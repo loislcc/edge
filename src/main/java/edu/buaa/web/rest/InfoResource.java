@@ -1,8 +1,11 @@
 package edu.buaa.web.rest;
+import com.alibaba.fastjson.JSONObject;
+import edu.buaa.domain.Constants;
 import edu.buaa.domain.Info;
 import edu.buaa.service.InfoService;
 import edu.buaa.web.rest.errors.BadRequestAlertException;
 import edu.buaa.web.rest.util.HeaderUtil;
+import edu.buaa.web.rest.util.ImageUtil;
 import edu.buaa.web.rest.util.PaginationUtil;
 import edu.buaa.service.dto.InfoCriteria;
 import edu.buaa.service.InfoQueryService;
@@ -15,8 +18,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -134,5 +142,45 @@ public class InfoResource {
         log.debug("REST request to delete Info : {}", id);
         infoService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+    }
+
+    @PostMapping(value = "/PostFileforimg")
+    public ResponseEntity<JSONObject> postFileforimg(@RequestParam("uploadfile") MultipartFile files) throws Exception {
+        String path = Constants.filepathtosaveimg;
+        File file = new  File ( path );
+        String filename = files.getOriginalFilename();
+        String  pathFile = path + File.separator + filename;
+        File  newFile = new  File(pathFile);
+        //判断文件夹是否存在，不存在则创建
+        if( !file.exists( ) ){
+            //创建文件夹
+            file.mkdirs();
+        }
+        try{
+            //文件传输到本地
+            files.transferTo(newFile);
+
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
+        // 文件流写入数据库表
+        FileInputStream in = null;
+        try
+        {
+            in = ImageUtil.readImage(pathFile);
+            byte[] bytes = new byte[in.available()];
+            in.read(bytes);
+            Info info = new Info();
+            info.setFile_name(filename);
+            info.setFile_type("png");
+            info.setFile_size(newFile.length());
+            info.setFile_body(bytes);
+            infoService.save(info);
+        } catch (Exception e) {
+            log.debug("error write into mysql");
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
