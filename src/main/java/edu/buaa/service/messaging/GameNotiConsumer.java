@@ -63,6 +63,7 @@ public class GameNotiConsumer {
                     if(!infoService.existsbyname(info.getFile_name())){   // 不存在重复的name 就存储
                         log.debug("!!!!!!!!!!!!!1,{}",info.toString());
                         infoService.save(info);
+                        infoService.saveIMG(info);
                     }
                 }
             }

@@ -2,8 +2,10 @@ package edu.buaa.web.rest;
 import com.alibaba.fastjson.JSONObject;
 import edu.buaa.domain.Constants;
 import edu.buaa.domain.Info;
+import edu.buaa.service.Constant;
 import edu.buaa.service.InfoService;
 import edu.buaa.web.rest.errors.BadRequestAlertException;
+import edu.buaa.web.rest.util.FileUtils;
 import edu.buaa.web.rest.util.HeaderUtil;
 import edu.buaa.web.rest.util.ImageUtil;
 import edu.buaa.web.rest.util.PaginationUtil;
@@ -145,6 +147,15 @@ public class InfoResource {
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
 
+    @GetMapping("/infos/rest")
+    public ResponseEntity<Info> resetall() {
+        log.debug("REST request to reset Info ");
+        infoService.deleteall();
+        String path = Constants.filepathtosaveimg + File.separator + Constants.Edgename;
+        FileUtils.delZSPic(path);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping(value = "/importimage", consumes = "multipart/form-data")
     public ResponseEntity<String> importTopology (MultipartHttpServletRequest request){
         log.debug("REST request to upload files");
@@ -164,7 +175,7 @@ public class InfoResource {
             return new ResponseEntity<>("", HttpStatus.BAD_REQUEST);
         }
 
-        String path = Constants.filepathtosaveimg;
+        String path = Constants.filepathtosaveimg + File.separator + Constants.Edgename;
         File file = new  File ( path );
         String filename = multipartFile.getOriginalFilename();
         String  pathFile = path + File.separator + filename;
@@ -201,6 +212,8 @@ public class InfoResource {
 
         return new ResponseEntity<>("", HttpStatus.OK);
     }
+
+
 
 //    @PostMapping(value = "/PostFileforimg")
 //    public ResponseEntity<JSONObject> postFileforimg(@RequestParam("uploadfile") MultipartFile files) throws Exception {

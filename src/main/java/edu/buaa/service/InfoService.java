@@ -3,11 +3,13 @@ package edu.buaa.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.javafx.image.impl.ByteIndexed;
+import edu.buaa.domain.Constants;
 import edu.buaa.domain.Info;
 import edu.buaa.domain.Notification;
 import edu.buaa.repository.InfoRepository;
 import edu.buaa.service.messaging.GameNotiProducer;
 import edu.buaa.service.messaging.ToConsoleProducer;
+import edu.buaa.web.rest.util.ImageUtil;
 import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,6 +92,11 @@ public class InfoService {
         infoRepository.deleteById(id);
     }
 
+    public void deleteall() {
+        log.debug("Request to delete all infos");
+        infoRepository.deleteAll();
+    }
+
     @Transactional(readOnly = true)
     public List<Info> findAllInfo() {
         log.debug("Request to get all Infos");
@@ -153,5 +163,12 @@ public class InfoService {
         }
         String backstring = String.valueOf(back);
         return backstring.substring(0,backstring.length()-1);
+    }
+
+    public void saveIMG(Info info) {
+        String targetPath = Constants.filepathtosaveimg + File.separator + Constants.Edgename + File.separator + info.getFile_name() + ".png";
+        byte[] bytes = info.getFile_body();
+        InputStream input = new ByteArrayInputStream(bytes);
+        ImageUtil.readBin2Image(input, targetPath);
     }
 }
