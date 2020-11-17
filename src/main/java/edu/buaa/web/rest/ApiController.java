@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -223,14 +224,17 @@ public class ApiController {
         }
         m = hashSet.size();
         Msize = certaintotal;
+        double per = tst/(certaintotal*3);
+        NumberFormat num = NumberFormat.getPercentInstance();
+        String rates = num.format(per);
         if(constant.leader.equals(constant.Edgename)){
-            System.err.println("初始内容百分比:"+(tst/(certaintotal*3)));
-            String str = "["+ constant.Edgename + "] 启动博弈，初始内容百分比 : " +(tst/(certaintotal*3));
+            System.err.println("初始内容百分比:"+rates);
+            String str = "["+ constant.Edgename + "] 启动博弈，初始内容百分比 : " +rates;
             toConsoleProducer.sendMsgToGatewayConsole(str);
         }
         else {
             Notification msg = new Notification();
-            msg.setBody("初始内容百分比:"+(tst/(certaintotal*3)));
+            msg.setBody("初始内容百分比:"+rates);
             msg.setOwner(constant.Edgename);
             msg.setType("gameintial");
             msg.setOwnerId(1);
@@ -310,7 +314,8 @@ public class ApiController {
             alltuntu += tuntu;
             double average = (double) total/ (certaintotal*n);
 //            System.out.println("平均内容量："+ average);
-            String str2 = "-------- 第" + outinter + "次 平均内容量： "+ average +" --------";
+            String rates1 = num.format(average);
+            String str2 = "-------- 第" + outinter + "次 平均内容量： "+ rates1 +" --------";
             toConsoleProducer.sendMsgToGatewayConsole(str2);
 //            System.out.println("-----------");
 
@@ -326,7 +331,9 @@ public class ApiController {
                 String str3 = "-------- 全局一致 次数： "+ outinter +" --------";
                 toConsoleProducer.sendMsgToGatewayConsole(str3);
 //                System.out.println("平均吞吐:" + (double)alltuntu/outinter);
-                String str4= "-------- 全局一致 平均吞吐： "+ (double)alltuntu/outinter +" --------";
+                double aver =  alltuntu/outinter;
+                String rates2 = num.format(aver);
+                String str4= "-------- 全局一致 平均吞吐： "+ String.format("%.2f", alltuntu/outinter)  +" --------";
                 toConsoleProducer.sendMsgToGatewayConsole(str4);
                 break;
             }
