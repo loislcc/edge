@@ -2,7 +2,6 @@ package edu.buaa.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.javafx.image.impl.ByteIndexed;
 import edu.buaa.domain.Constants;
 import edu.buaa.domain.Info;
 import edu.buaa.domain.Notification;
