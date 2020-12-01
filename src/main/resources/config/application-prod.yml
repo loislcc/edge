@@ -29,13 +29,13 @@ spring:
         consul:
             discovery:
                prefer-ip-address: true
-            host: registry
+            host: 127.0.0.1
             port: 8500
         stream:
             kafka:
                 binder:
-                    brokers: registry
-                    zk-nodes: locregistryalhost
+                    brokers: 127.0.0.1
+                    zk-nodes: 127.0.0.1
             bindings:
                 output:
                     destination: topic-jhipster

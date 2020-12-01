@@ -31,7 +31,7 @@ public class EsFileResource {
 
     @PostMapping(value = "/PostFile")
     public ResponseEntity<JSONObject> postFile(@RequestParam("file") MultipartFile files) throws Exception {
-        String path = Constants.filepathtosave;
+        String path = Constants.filepathtosave+File.separator+Constants.Edgename;
         File file = new  File ( path );
         String filename = files.getOriginalFilename();
         String  pathFile = path + File.separator + filename;
@@ -53,7 +53,7 @@ public class EsFileResource {
 
     @PostMapping(value = "/getFile")
     public ResponseEntity<JSONObject> getFile(@RequestParam("name") String name) {
-        String path = Constants.filepathtosave+File.separator+name+".txt";
+        String path = Constants.filepathtosave+File.separator+Constants.Edgename+File.separator+name+".txt";
         File f = new File(path);
         MultipartFile mf = utils.getMulFile(f);
         gatewayClient.PostFile(mf);

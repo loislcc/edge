@@ -147,7 +147,7 @@ public class InfoResource {
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
 
-    @GetMapping("/infos/rest")
+    @GetMapping("/infos/reset")
     public ResponseEntity<Info> resetall() {
         log.debug("REST request to reset Info ");
         infoService.deleteall();

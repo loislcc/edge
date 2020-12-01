@@ -38,13 +38,13 @@ spring:
         consul:
             discovery:
                prefer-ip-address: true
-            host: registry
+            host: 10.4.10.205
             port: 8500
         stream:
             kafka:
                 binder:
-                    brokers: registry
-                    zk-nodes: registry
+                    brokers: 10.4.10.205
+                    zk-nodes: 10.4.10.205
             bindings:
                 UpdateTargetChannel:
                     destination: gateway
@@ -72,7 +72,7 @@ spring:
         type: com.zaxxer.hikari.HikariDataSource
         url: jdbc:mysql://localhost:3306/edge?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
         username: root
-        password: lcly6557
+        password: root
         hikari:
             poolName: Hikari
             auto-commit: false
