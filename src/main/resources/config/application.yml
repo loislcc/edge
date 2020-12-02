@@ -32,9 +32,11 @@ hystrix:
     command:
         default:
             execution:
+                timeout:
+                    enabled: false
                 isolation:
                     strategy: SEMAPHORE
-# See https://github.com/spring-cloud/spring-cloud-netflix/issues/1330
+                    # See https://github.com/spring-cloud/spring-cloud-netflix/issues/1330
                     thread:
                         timeoutInMilliseconds: 2000000000
     shareSecurityContext: true
