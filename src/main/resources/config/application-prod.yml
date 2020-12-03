@@ -29,13 +29,13 @@ spring:
         consul:
             discovery:
                prefer-ip-address: true
-            host: 10.4.10.205
+            host: 10.4.10.228
             port: 8500
         stream:
             kafka:
                 binder:
-                    brokers: 10.4.10.205
-                    zk-nodes: 10.4.10.205
+                    brokers: 10.4.10.228
+                    zk-nodes: 10.4.10.228
             bindings:
                 output:
                     destination: topic-jhipster
