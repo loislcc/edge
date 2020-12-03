@@ -7,10 +7,7 @@ import edu.buaa.domain.Info;
 import edu.buaa.domain.Notification;
 import edu.buaa.domain.messaging.TargetNotification;
 import edu.buaa.repository.InfoRepository;
-import edu.buaa.service.Constant;
-import edu.buaa.service.InfoService;
-import edu.buaa.service.SendClient;
-import edu.buaa.service.SendClient3;
+import edu.buaa.service.*;
 import edu.buaa.service.messaging.*;
 
 import edu.buaa.web.rest.util.IPUtils;
@@ -51,6 +48,8 @@ public class ApiController {
     @Resource
     private SendClient3 sendClient3;
 
+    private gdata  gdata1;
+
     private HashMap<Stragey,Integer> history = new HashMap<>();
     private int m = 0;
     private double Msize = 0;
@@ -69,7 +68,7 @@ public class ApiController {
 
     public ApiController(UpdateTargetNotificationProducer updateTargetNotificationProducer, ShareNotiProducer shareNotiProducer,
                          Constant constant, InfoService infoService, SendClient sendClient, SendClient3 sendClient3,
-                         GameNotiProducer gameNotiProducer, ToConsoleProducer toConsoleProducer) {
+                         GameNotiProducer gameNotiProducer, ToConsoleProducer toConsoleProducer,gdata gdata) {
         this.updateTargetNotificationProducer = updateTargetNotificationProducer;
         this.shareNotiProducer = shareNotiProducer;
         this.constant  = constant;
@@ -78,6 +77,7 @@ public class ApiController {
         this.sendClient3 = sendClient3;
         this.gameNotiProducer = gameNotiProducer;
         this.toConsoleProducer = toConsoleProducer;
+        this.gdata1 = gdata;
     }
     @RequestMapping(value = "/map", method = RequestMethod.GET)
     public
@@ -123,6 +123,12 @@ public class ApiController {
         msg.setBody("hello!");
         shareNotiProducer.sendMsgToEdges(msg);
 
+    }
+
+    @GetMapping("/tests")
+    public void tests() {
+        JSONObject RES = gdata1.gettest();
+        log.debug("%%%%%%%%%%%%%%%%,{}",RES.get("res"));
     }
 
     @GetMapping("/test")
