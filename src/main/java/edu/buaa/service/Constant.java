@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 @EnableBinding(Constant.class)
 public class Constant {
-    public String Edgename = "edge";
+    public static String Edgename = "edge";
     public int term = 0;
     public String leader = "";
     public List<Integer> neigboursId = null;

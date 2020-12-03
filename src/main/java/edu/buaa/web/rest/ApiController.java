@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -92,29 +94,8 @@ public class ApiController {
 
     }
 
-    @GetMapping("/detectTarget")
-    public ResponseEntity<JSONObject> detectTarget() {
-        TargetNotification targetNotification = new TargetNotification();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String localip = IPUtils.getLocalIpAddr();
-        targetNotification.setIp(localip);
-        targetNotification.setCurrentTime(sdf.format(new Date()));
-        targetNotification.setCategory("Car");
-        targetNotification.setName("20200904");
-        targetNotification.setLongitude(120.191157);
-        targetNotification.setLatitude(30.274664);
-//        targetNotification.setSelfLongitude(116.434924);
-//        targetNotification.setSelfLatitude(39.915671);116.433547
-        targetNotification.setSelfLongitude(120.188426);
-        targetNotification.setSelfLatitude(30.273884);
-        targetNotification.setOwner(constant.Edgename);
-        targetNotification.setLevel("top");
-        targetNotification.setBrief(localip+" ---> "+targetNotification.getCategory()+" in ("+targetNotification.getLongitude()+"，"+targetNotification.getLatitude()+");");
-        log.debug("*******,{}",targetNotification.toString());
-        updateTargetNotificationProducer.sendMsgToGateway(targetNotification);
-        toConsoleProducer.sendMsgToGatewayConsole(targetNotification.getBrief());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+
+
 
     @GetMapping("/sendfromEdge")
     public void sendEdge() {
@@ -684,6 +665,87 @@ public class ApiController {
         }
         return first;
     }
+
+
+    @GetMapping("/detectTarget")
+    public ResponseEntity<JSONObject> detectTarget() {
+        String strDateFormat = "yyyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(strDateFormat);
+        String strDateFormat2 = "yyyyMMddHHmmss";
+        SimpleDateFormat sdf2 = new SimpleDateFormat(strDateFormat2);
+
+        TargetNotification targetNotification = new TargetNotification();
+        String localip = IPUtils.getLocalIpAddr();
+        targetNotification.setIp(localip);
+        targetNotification.setCurrentTime(sdf.format(new Date()));
+        targetNotification.setName(sdf2.format(new Date()));
+        targetNotification.setCategory("plane");
+        targetNotification.setLongitude(120.191157);
+        targetNotification.setLatitude(30.274664);
+//        targetNotification.setSelfLongitude(116.434924);
+//        targetNotification.setSelfLatitude(39.915671);116.433547
+        targetNotification.setSelfLongitude(120.188426);
+        targetNotification.setSelfLatitude(30.273884);
+        targetNotification.setOwner(Constant.Edgename);
+        targetNotification.setBrief(localip+" ---> "+targetNotification.getCategory()+" in ("+targetNotification.getLongitude()+"，"+targetNotification.getLatitude()+");");
+        try {
+            System.out.println("start");
+            toConsoleProducer.sendMsgToGatewayConsole(localip + " start computing!");
+            Process pr = Runtime.getRuntime().exec("python3 /home/nvidia/Desktop/edgeComputing/distributed/yolo.py");
+            BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+            String line;
+            System.out.println("in"+in.toString());
+            System.out.println("pr"+pr.getErrorStream());
+            while ((line = in.readLine()) != null) {
+                // line = decodeUnicode(line);
+                System.out.println(line);
+                if(line.startsWith("object is")){
+                    //      toConsoleProducer.sendMsgToGatewayConsole("ip:10.4.10.242 collaboraitve computing");
+                    String target = line.split(" ")[2];
+                    targetNotification.setCategory(target);
+                }
+
+            }
+            in.close();
+            pr.waitFor();
+            toConsoleProducer.sendMsgToGatewayConsole("computing end!");
+            System.out.println("end");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("class is "+targetNotification.getCategory());
+        targetNotification.setBrief(localip+" ---> "+targetNotification.getCategory()+" in ("+targetNotification.getLongitude()+"，"+targetNotification.getLatitude()+");");
+        updateTargetNotificationProducer.sendMsgToGateway(targetNotification);
+        toConsoleProducer.sendMsgToGatewayConsole(targetNotification.getBrief());
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+
+//        @GetMapping("/detectTarget")
+//    public ResponseEntity<JSONObject> detectTarget() {
+//        TargetNotification targetNotification = new TargetNotification();
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        String localip = IPUtils.getLocalIpAddr();
+//        targetNotification.setIp(localip);
+//        targetNotification.setCurrentTime(sdf.format(new Date()));
+//        targetNotification.setCategory("Car");
+//        targetNotification.setName("20200904");
+//        targetNotification.setLongitude(120.191157);
+//        targetNotification.setLatitude(30.274664);
+////        targetNotification.setSelfLongitude(116.434924);
+////        targetNotification.setSelfLatitude(39.915671);116.433547
+//        targetNotification.setSelfLongitude(120.188426);
+//        targetNotification.setSelfLatitude(30.273884);
+//        targetNotification.setOwner(constant.Edgename);
+//        targetNotification.setLevel("top");
+//        targetNotification.setBrief(localip+" ---> "+targetNotification.getCategory()+" in ("+targetNotification.getLongitude()+"，"+targetNotification.getLatitude()+");");
+//        log.debug("*******,{}",targetNotification.toString());
+//        updateTargetNotificationProducer.sendMsgToGateway(targetNotification);
+//        toConsoleProducer.sendMsgToGatewayConsole(targetNotification.getBrief());
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
+
 
 }
 
