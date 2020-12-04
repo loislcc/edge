@@ -694,8 +694,8 @@ public class ApiController {
         targetNotification.setCategory("plane");
         double[] ran = randomLonLat(116.315157, 116.385297,39.97073, 39.974511);
         targetNotification.setLongitude(ran[0]);
-        targetNotification.setLatitude(ran[0]);
-        targetNotification.setSelfLongitude(ran[1]);
+        targetNotification.setLatitude(ran[1]);
+        targetNotification.setSelfLongitude(ran[0]);
         targetNotification.setSelfLatitude(ran[1]);
         targetNotification.setOwner(Constant.Edgename);
         targetNotification.setBrief(localip+" ---> "+targetNotification.getCategory()+" in ("+targetNotification.getLongitude()+"，"+targetNotification.getLatitude()+");");
