@@ -707,11 +707,11 @@ public class ApiController {
             String line;
             System.out.println("in"+in.toString());
             System.out.println("pr"+pr.getErrorStream());
+            toConsoleProducer.sendMsgToGatewayConsole("ip:10.4.10.200 collaboraitve computing");
             while ((line = in.readLine()) != null) {
                 // line = decodeUnicode(line);
                 System.out.println(line);
                 if(line.startsWith("object is")){
-                    toConsoleProducer.sendMsgToGatewayConsole("ip:10.4.10.200 collaboraitve computing");
                     String target = line.split(" ")[2];
                     targetNotification.setCategory(target);
                 }
