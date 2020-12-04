@@ -25,6 +25,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -666,6 +667,17 @@ public class ApiController {
         return first;
     }
 
+    public static double[] randomLonLat(double MinLon, double MaxLon, double MinLat, double MaxLat) {
+        Random random = new Random();
+        BigDecimal db = new BigDecimal(Math.random() * (MaxLon - MinLon) + MinLon);
+        String lon = db.setScale(6, BigDecimal.ROUND_HALF_UP).toString();// 小数后6位
+        db = new BigDecimal(Math.random() * (MaxLat - MinLat) + MinLat);
+        String lat = db.setScale(6, BigDecimal.ROUND_HALF_UP).toString();
+        double[] res = new double[2];
+        res[0] = Double.valueOf(lon);
+        res[1] = Double.valueOf(lat);
+        return res;
+}
 
     @GetMapping("/detectTarget")
     public ResponseEntity<JSONObject> detectTarget() {
@@ -680,17 +692,16 @@ public class ApiController {
         targetNotification.setCurrentTime(sdf.format(new Date()));
         targetNotification.setName(sdf2.format(new Date()));
         targetNotification.setCategory("plane");
-        targetNotification.setLongitude(120.191157);
-        targetNotification.setLatitude(30.274664);
-//        targetNotification.setSelfLongitude(116.434924);
-//        targetNotification.setSelfLatitude(39.915671);116.433547
-        targetNotification.setSelfLongitude(120.188426);
-        targetNotification.setSelfLatitude(30.273884);
+        double[] ran = randomLonLat(116.315157, 116.385297,39.97073, 39.974511);
+        targetNotification.setLongitude(ran[0]);
+        targetNotification.setLatitude(ran[0]);
+        targetNotification.setSelfLongitude(ran[1]);
+        targetNotification.setSelfLatitude(ran[1]);
         targetNotification.setOwner(Constant.Edgename);
         targetNotification.setBrief(localip+" ---> "+targetNotification.getCategory()+" in ("+targetNotification.getLongitude()+"，"+targetNotification.getLatitude()+");");
         try {
             System.out.println("start");
-            toConsoleProducer.sendMsgToGatewayConsole(localip + " start computing!");
+            toConsoleProducer.sendMsgToGatewayConsole(localip + " start task!");
             Process pr = Runtime.getRuntime().exec("python3 /home/nvidia/Desktop/edgeComputing/distributed/yolo.py");
             BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
             String line;
@@ -700,15 +711,19 @@ public class ApiController {
                 // line = decodeUnicode(line);
                 System.out.println(line);
                 if(line.startsWith("object is")){
-                    //      toConsoleProducer.sendMsgToGatewayConsole("ip:10.4.10.242 collaboraitve computing");
+                    toConsoleProducer.sendMsgToGatewayConsole("ip:10.4.10.200 collaboraitve computing");
                     String target = line.split(" ")[2];
                     targetNotification.setCategory(target);
+                }
+                if(line.startsWith("time")){
+                    String target = line.split(":")[1];
+                    toConsoleProducer.sendMsgToGatewayConsole("computing time: " + target +"s");
                 }
 
             }
             in.close();
             pr.waitFor();
-            toConsoleProducer.sendMsgToGatewayConsole("computing end!");
+            toConsoleProducer.sendMsgToGatewayConsole("task end!");
             System.out.println("end");
         } catch (Exception e) {
             e.printStackTrace();
@@ -720,33 +735,6 @@ public class ApiController {
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
-
-
-//        @GetMapping("/detectTarget")
-//    public ResponseEntity<JSONObject> detectTarget() {
-//        TargetNotification targetNotification = new TargetNotification();
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        String localip = IPUtils.getLocalIpAddr();
-//        targetNotification.setIp(localip);
-//        targetNotification.setCurrentTime(sdf.format(new Date()));
-//        targetNotification.setCategory("Car");
-//        targetNotification.setName("20200904");
-//        targetNotification.setLongitude(120.191157);
-//        targetNotification.setLatitude(30.274664);
-////        targetNotification.setSelfLongitude(116.434924);
-////        targetNotification.setSelfLatitude(39.915671);116.433547
-//        targetNotification.setSelfLongitude(120.188426);
-//        targetNotification.setSelfLatitude(30.273884);
-//        targetNotification.setOwner(constant.Edgename);
-//        targetNotification.setLevel("top");
-//        targetNotification.setBrief(localip+" ---> "+targetNotification.getCategory()+" in ("+targetNotification.getLongitude()+"，"+targetNotification.getLatitude()+");");
-//        log.debug("*******,{}",targetNotification.toString());
-//        updateTargetNotificationProducer.sendMsgToGateway(targetNotification);
-//        toConsoleProducer.sendMsgToGatewayConsole(targetNotification.getBrief());
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
-
-
 }
 
 
